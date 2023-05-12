@@ -71,7 +71,7 @@ function formbuilder_admincallback(){
  * 
  */
 function formbuilder_view_shortcode( $atts ){
-    wp_enqueue_style( 'formbuilder-css' );
+    wp_enqueue_style( 'formbuilder-bootstrap' );
 
     $shortcode_args = shortcode_atts(
         array(
@@ -132,7 +132,7 @@ add_action( 'admin_init', 'formbuilder_formsubmit' );
 /**
  * Enqueue styles and scripts.
  */
-function formbuilder_stylesheet() {
+function formbuilder_admin_stylesheet() {
     //bootstrap cdn.
     wp_register_style( 'formbuilder-bootstrap', 'https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css' );
     
@@ -144,5 +144,19 @@ function formbuilder_stylesheet() {
     wp_register_style( 'formbuilder-css', plugins_url( 'assets/css/formbuilder-style.css', __FILE__ ), array( 'formbuilder-bootstrap' ) );
 
 }
-add_action( 'admin_enqueue_scripts', 'formbuilder_stylesheet' );
+add_action( 'admin_enqueue_scripts', 'formbuilder_admin_stylesheet' );
+
+/**
+ * Enqueue styles and scripts.
+ */
+function formbuilder_stylesheet() {
+    //bootstrap cdn.
+    wp_register_style( 'formbuilder-bootstrap', 'https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css' );
+        
+    //custom js, css.
+    // wp_register_script( 'formbuilder-js', plugins_url( 'assets/js/formbuilder-script.js', __FILE__ ), array( 'jquery' ), null, true );
+    // wp_register_style( 'formbuilder-css', plugins_url( 'assets/css/formbuilder-style.css', __FILE__ ), array( 'formbuilder-bootstrap' ) );
+
+}
+add_action( 'wp_enqueue_scripts', 'formbuilder_stylesheet' );
 

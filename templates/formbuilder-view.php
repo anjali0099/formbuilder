@@ -9,9 +9,9 @@ wp_enqueue_style( 'formbuilder-css' );
     <table class="table table-striped">
         <thead>
             <tr>
-                <th scope="col"><?php _e( 'Title', 'formbuilder' ) ?></th>
-                <th scope="col"><?php _e( 'Shortcode', 'formbuilder' ) ?></th>
-                <th scope="col"><?php _e( 'Date', 'formbuilder' ) ?></th>
+                <th scope="col" style="text-align: center;"><?php _e( 'Title', 'formbuilder' ) ?></th>
+                <th scope="col" style="text-align: center;"><?php _e( 'Shortcode', 'formbuilder' ) ?></th>
+                <th scope="col" style="text-align: center;"><?php _e( 'Date', 'formbuilder' ) ?></th>
             </tr>
         </thead>
         <tbody>
@@ -28,11 +28,12 @@ wp_enqueue_style( 'formbuilder-css' );
                         $formbuilder_view = '[formbuilder-shortcode id="'.$Post_id.'"]';
                         ?>
                             <tr>
-                                <td> <?php the_title();  ?> </td>
-                                <td> 
+                                <td style="text-align: center;"> <?php the_title();  ?> </td>
+                                <td style="text-align: center;"> 
                                     <input type="text" readonly="readonly" value='<?php echo $formbuilder_view ?>' class="large-text">
                                 </td>
-                                <td> <?php echo the_date( 'd-m-Y' ); ?> </td>
+                                <td style="text-align: center;"> <?php echo the_date( 'd-m-Y' ); ?> </td>
+                                
                             </tr>
                         <?php
                     endwhile;
