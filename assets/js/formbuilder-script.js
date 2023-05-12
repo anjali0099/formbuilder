@@ -2,7 +2,7 @@
     document.addEventListener('click', function(e) {
         var selected_id = e.target.id;
         var box = document.getElementById("formbuilder_content");
-        const randnum = Math.floor(Math.random() * (100 - 1)) + 1;
+        const randnum = Math.floor(Math.random() * (1000 - 1)) + 1;
 
         if ( selected_id == 'text_field' ){
             box.value += '[type="text" name="form_text_field" id="textfield_'+randnum+'"]';

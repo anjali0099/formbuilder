@@ -61,7 +61,7 @@ add_action('admin_menu', 'formbuilder_page');
  */
 function formbuilder_admincallback(){
     include('templates/formbuilder-view.php');
-    formbuilder_view_shortcode( $formbuilder_view );
+    // formbuilder_view_shortcode( $formbuilder_view );
 }
 
 /**
@@ -70,12 +70,35 @@ function formbuilder_admincallback(){
  * @param array $formbuilder_view Shortcode value from table.
  * 
  */
-function formbuilder_view_shortcode( $formbuilder_view ){
-  echo 'here';
+function formbuilder_view_shortcode( $atts ){
+    wp_enqueue_style( 'formbuilder-css' );
 
+    $shortcode_args = shortcode_atts(
+        array(
+            'id' => '',
+        ), $atts
+    );
+    $args = array(
+        'post_type' => 'formbuilder',
+        'posts_per_page' => '1',
+        'post_status' => 'publish',
+        'p' => $shortcode_args['id'],
+    );
 
+    $query = new WP_Query( $args );
+    ob_start();
+
+    if( $query->have_posts() ){
+        while( $query->have_posts() ){
+            $query->the_post();
+            include( 'templates/formbuilder-shortcode-view.php' );
+        }
+    }
+    wp_reset_postdata();
+    $result = ob_get_clean();
+    return $result;
 }
-// add_action( 'admin_init', 'formbuilder_view_shortcode'  );
+add_shortcode( 'formbuilder-shortcode', 'formbuilder_view_shortcode' );
 
 /**
  * Callback function for formbuilder_page add_submenu_page
@@ -105,7 +128,7 @@ function formbuilder_formsubmit( $post_id ){
     }
 }
 add_action( 'admin_init', 'formbuilder_formsubmit' );
-
+ 
 /**
  * Enqueue styles and scripts.
  */

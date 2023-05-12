@@ -25,12 +25,12 @@ wp_enqueue_style( 'formbuilder-css' );
                     while ( $query->have_posts() ):
                         $query->the_post();
                         $Post_id = get_the_ID();
-                        $formbuilder_view = '[ formbuider-shortcode-'.$Post_id.' ]';
+                        $formbuilder_view = '[formbuilder-shortcode id="'.$Post_id.'"]';
                         ?>
                             <tr>
                                 <td> <?php the_title();  ?> </td>
                                 <td> 
-                                    <input type="text" readonly="readonly" value=' <?php echo $formbuilder_view ?> ' class="large-text">
+                                    <input type="text" readonly="readonly" value='<?php echo $formbuilder_view ?>' class="large-text">
                                 </td>
                                 <td> <?php echo the_date( 'd-m-Y' ); ?> </td>
                             </tr>
