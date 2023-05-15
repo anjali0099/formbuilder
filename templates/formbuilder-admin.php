@@ -13,6 +13,9 @@ wp_enqueue_style( 'formbuilder-css' );
                 <div class="form-group" id="input_field_div">
                     <button type="button"  class="btn btn-light field_name" name="text_field" id="text_field" >text</button>
                     <button type="button"  class="btn btn-light field_name" name="email_field" id="email_field" >email</button>
+                    <button type="button"  class="btn btn-light field_name" name="textarea_field" id="textarea_field" >textarea</button>
+                    <button type="button"  class="btn btn-light field_name" name="password_field" id="password_field" >password</button>
+                    <button type="button"  class="btn btn-light field_name" name="submit_field" id="submit_field" >submit</button>
                 </div>
                 <div class="form-group">
                     <textarea  class="form-control" name="formbuilder_content" id="formbuilder_content" rows="20" ></textarea>

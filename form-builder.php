@@ -61,7 +61,6 @@ add_action('admin_menu', 'formbuilder_page');
  */
 function formbuilder_admincallback(){
     include('templates/formbuilder-view.php');
-    // formbuilder_view_shortcode( $formbuilder_view );
 }
 
 /**
@@ -91,9 +90,22 @@ function formbuilder_view_shortcode( $atts ){
     if( $query->have_posts() ){
         while( $query->have_posts() ){
             $query->the_post();
+     
+            $content = get_the_content();
+            $pattern = '/\[type="(.*?)" name="(.*?)" id="(.*?)"\]/';
+            preg_match_all($pattern, $content, $matches, PREG_SET_ORDER);
+
+            $result = [];
+            foreach ($matches as $match) {
+                $type = $match[1];
+                $name = $match[2];
+                $id = $match[3];
+                $result[] = compact('type', 'name', 'id');
+            }
             include( 'templates/formbuilder-shortcode-view.php' );
         }
     }
+
     wp_reset_postdata();
     $result = ob_get_clean();
     return $result;
