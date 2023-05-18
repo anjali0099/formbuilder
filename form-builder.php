@@ -34,6 +34,8 @@ add_action( 'init', 'formbuilder_post_type' );
 
 /**
  * Add new menu/submenu page.
+ * Admin Form Builder for listing forms.
+ * Add New Forms for adding new forms.
  */
 function formbuilder_page(){
     add_menu_page(
@@ -42,7 +44,6 @@ function formbuilder_page(){
         'edit_posts',//capability 
         'admin-form-builder',//menu slug/handle this is what you need!!!
         'formbuilder_admincallback',//callback function
-     
     );
     add_submenu_page(
         'admin-form-builder', //parent menu slug
@@ -123,7 +124,9 @@ function formbuilder_callback_menu(){
 
 /**
  * Form submit 
+ * Update Form
  * @param array $post_id Post ID
+ * @return void
  */ 
 function formbuilder_formsubmit( $post_id ){
     if( isset( $_POST['formbuilder_page_submit'] ) ){
@@ -137,10 +140,37 @@ function formbuilder_formsubmit( $post_id ){
         $postdata['post_type'] = 'formbuilder';
 
         $save_formbuilder_page_submit = wp_insert_post( $postdata );
+    }elseif( isset( $_POST['formbuilder_update_submit'] ) ){
+        if( ! wp_verify_nonce( wp_unslash( $_POST['formbuilder_nonce'] ), 'formbuilder_form' ) ) {
+            return;
+        };
+        $postdata = [];
+        $postdata['ID'] = $_POST['formbuilder_editid'];
+        $postdata['post_title'] = sanitize_text_field( wp_unslash( $_POST['formbuilder_title'] ) );
+        $postdata['post_content'] = $_POST['formbuilder_content'];
+        $postdata['post_status'] = 'publish';
+        $postdata['post_type'] = 'formbuilder';
+
+        $update_formbuilder_page_submit = wp_update_post( $postdata);
     }
 }
 add_action( 'admin_init', 'formbuilder_formsubmit' );
- 
+
+/**
+ * Deletes post of 'Formbuilder' post_type from DB.
+ * 
+ * @return void
+ */
+function formbuilder_delete_post(){
+    if ( isset( $_GET['action'] ) && $_GET['action'] === 'delete' && isset( $_GET['form_id'] ) ) {
+        $form_id = $_GET['form_id'];
+        
+        wp_delete_post( $form_id ); // Delete data from DB.
+        wp_redirect( admin_url( 'admin.php?page=admin-form-builder' ) ); // Redirects to the path.
+    }
+}
+add_action( 'admin_init', 'formbuilder_delete_post' );
+
 /**
  * Enqueue styles and scripts.
  */
@@ -150,9 +180,9 @@ function formbuilder_admin_stylesheet() {
     
     // ajax.
     wp_register_script( 'formbuilder-ajax', 'https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js' );
-    
+
     //custom js, css.
-    wp_register_script( 'formbuilder-js', plugins_url( 'assets/js/formbuilder-script.js', __FILE__ ), array( 'jquery', 'formbuilder-ajax' ), null, true );
+    wp_register_script( 'formbuilder-js', plugins_url( 'assets/js/formbuilder-script.js', __FILE__ ), array( 'jquery','formbuilder-ajax' ), null, true );
     wp_register_style( 'formbuilder-css', plugins_url( 'assets/css/formbuilder-style.css', __FILE__ ), array( 'formbuilder-bootstrap' ) );
 
 }

@@ -11,17 +11,21 @@
                     $id = $value['id'];
 
                     if ( ! empty( $type ) ) {
-                        if ( $type != "submit" && $type != "textarea" ) {
-                            echo '<label> ' . $type . ' </label>';
-                            echo '<input type="' . $type . '" name="' . $name . '" id="' . $id . '" class="form-control" >';
-                            echo '<br>';
-                        }elseif ( $type == "textarea" ){
-                            echo '<label> ' . $type . ' </label>';
-                            echo '<textarea class="form-control" name="' . $name . '" id="' . $id . '" rows="3"></textarea>';
-                            echo '<br>';
-                        }elseif ( $type == "submit" ){
-                            echo '<button type="' . $type . '" name="' . $name . '" id="' . $id . '" class="btn btn-sm btn-light" > '. ucfirst( $type ) .' </button> ';
-                            echo '<br>';
+                        switch ( $type ) {
+                            case 'label':
+                                echo '<label> '. $name .' </label>';
+                                break;
+                            case 'textarea':
+                                echo '<textarea class="form-control" name="' . $name . '" id="' . $id . '" rows="3"></textarea>';
+                                echo '<br>';
+                                break;
+                            case 'submit':
+                                echo '<input type="' . $type . '" name="' . $name . '" id="' . $id . '" class="btn btn-sm btn-light" > ';
+                                echo '<br>';
+                                break;
+                            default:
+                                echo '<input type="' . $type . '" name="' . $name . '" id="' . $id . '" class="form-control" >';
+                                echo '<br>';
                         }
                     }
                 }
@@ -29,6 +33,5 @@
             </form>
             <?php
         ?>
-       
     </div>
 </div>
