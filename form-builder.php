@@ -68,7 +68,7 @@ function formbuilder_admincallback(){
  * Shortcode for the post
  * 
  * @param array $formbuilder_view Shortcode value from table.
- * 
+ * @return void
  */
 function formbuilder_view_shortcode( $atts ){
     wp_enqueue_style( 'formbuilder-bootstrap' );
@@ -128,7 +128,7 @@ function formbuilder_view_shortcode( $atts ){
                             echo '<br>';
                             break;
                         case 'submit':
-                            echo '<input type="' . $type . '" name="' . $name . '" id="' . $id . '" value="' . $value . '"  class="btn btn-sm btn-light" > ';
+                            echo '<input type="' . $type . '" name="' . $name . '" id="' . $id . '" value="' . $value . '"  class="btn btn-sm btn-outline-primary" > ';
                             echo '<br>';
                             break;
                         default:
@@ -142,10 +142,12 @@ function formbuilder_view_shortcode( $atts ){
     }
     wp_reset_postdata();
     ?>
+            <?php wp_nonce_field( 'formbuilder_newform', 'formbuilder_newnonce' ); ?>
             </form>
         </div>
     </div>
     <?php
+
     $result = ob_get_clean();
     return $result;
 }
