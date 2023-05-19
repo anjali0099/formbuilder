@@ -87,27 +87,65 @@ function formbuilder_view_shortcode( $atts ){
 
     $query = new WP_Query( $args );
     ob_start();
+    ?>
+    <div class="card">
+        <div class="card-body">
+            
+    <?php
 
     if( $query->have_posts() ){
         while( $query->have_posts() ){
             $query->the_post();
-     
+            ?>
+                <h4 class="card-title"><?php _e(  the_title(), 'formbuilder' ) ?></h4><hr>
+                <form action="" method="POST">
+            <?php
             $content = get_the_content();
-            $pattern = '/\[type="(.*?)" name="(.*?)" id="(.*?)"\]/';
-            preg_match_all($pattern, $content, $matches, PREG_SET_ORDER);
+            $explode_data = explode( ']', $content );
 
-            $result = [];
-            foreach ($matches as $match) {
-                $type = $match[1];
-                $name = $match[2];
-                $id = $match[3];
-                $result[] = compact('type', 'name', 'id');
+            $pattern = '/(\w+)\s*=\s*("[^"]*")/'; 
+            foreach ($explode_data as $element) {
+                preg_match_all($pattern, $element, $matches, PREG_SET_ORDER);
+                if (!empty($matches)) {
+                    $attribute_value = [];
+                    foreach ($matches as $match) {
+                        $key = $match[1];
+                        $value = isset($match[2]) ? trim($match[2], '"') : '';
+                        $attribute_value[$key] = $value;
+                    }
+                    $type = isset( $attribute_value['type'] ) ? $attribute_value['type'] : '';
+                    $name = isset( $attribute_value['name'] ) ? $attribute_value['name'] : '';
+                    $id = isset( $attribute_value['id'] ) ? $attribute_value['id'] : '';
+                    $placeholder = isset( $attribute_value['placeholder'] ) ? $attribute_value['placeholder'] : '';
+                    $label = isset( $attribute_value['label'] ) ? $attribute_value['label'] : $placeholder;
+                    $value = isset( $attribute_value['value'] ) ? $attribute_value['value'] : $type;
+                    $for = $id;
+                    
+                    switch ( $type ) {
+                        case 'textarea':
+                            echo '<label for="' . $for . '">'.$label.'</label>';
+                            echo '<textarea class="form-control" name="' . $name . '" id="' . $id . '" placeholder="'. $placeholder .'" rows="3"></textarea>';
+                            echo '<br>';
+                            break;
+                        case 'submit':
+                            echo '<input type="' . $type . '" name="' . $name . '" id="' . $id . '" value="' . $value . '"  class="btn btn-sm btn-light" > ';
+                            echo '<br>';
+                            break;
+                        default:
+                            echo '<label for="' . $for . '">'.$label.'</label>';
+                            echo '<input type="' . $type . '" name="' . $name . '" id="' . $id . '" placeholder="'. $placeholder .'" class="form-control" >';
+                            echo '<br>';
+                    }
+                }
             }
-            include( 'templates/formbuilder-shortcode-view.php' );
         }
     }
-
     wp_reset_postdata();
+    ?>
+            </form>
+        </div>
+    </div>
+    <?php
     $result = ob_get_clean();
     return $result;
 }
