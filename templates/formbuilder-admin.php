@@ -18,7 +18,6 @@ if ( empty( $form_post_id ) ){
                             <input type="text" class="form-control" name="formbuilder_title" id="formbuilder_title" required>
                         </div><hr>
                         <div class="form-group" id="input_field_div">
-                            <!-- <button type="button"  class="btn btn-light field_name" name="label_field" id="label_field" >label</button> -->
                             <button type="button"  class="btn btn-light field_name" name="text_field" id="text_field" >text</button>
                             <button type="button"  class="btn btn-light field_name" name="email_field" id="email_field" >email</button>
                             <button type="button"  class="btn btn-light field_name" name="textarea_field" id="textarea_field" >textarea</button>
@@ -35,7 +34,6 @@ if ( empty( $form_post_id ) ){
                         <?php else : ?>
                             <input type="submit" name="formbuilder_update_submit" id="formbuilder_update_submit" value="Update Changes">
                         <?php endif; ?>
-
                     </form>
                 </div>
             </div>
@@ -57,7 +55,6 @@ if ( empty( $form_post_id ) ){
                             <input type="text" class="form-control" name="formbuilder_title" id="formbuilder_title" value=" <?php echo esc_attr( $form_title ) ?> " required>
                         </div><hr>
                         <div class="form-group" id="input_field_div">
-                            <!-- <button type="button"  class="btn btn-light field_name" name="label_field" id="label_field" >label</button> -->
                             <button type="button"  class="btn btn-light field_name" name="text_field" id="text_field" >text</button>
                             <button type="button"  class="btn btn-light field_name" name="email_field" id="email_field" >email</button>
                             <button type="button"  class="btn btn-light field_name" name="textarea_field" id="textarea_field" >textarea</button>
@@ -79,5 +76,4 @@ if ( empty( $form_post_id ) ){
             </div>
         </div>
     <?php
-    
 }

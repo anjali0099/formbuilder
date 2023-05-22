@@ -53,6 +53,14 @@ function formbuilder_page(){
         'admin-form',//menu slug
         'formbuilder_callback_menu' //callback function
     );
+    add_submenu_page(
+        'admin-form-builder', //parent menu slug
+        __( 'Form Data View', 'formbuilder' ), //page title
+        __( 'Submission View', 'formbuilder' ), //menu title
+        'edit_posts', //capability,
+        'form-data-view',//menu slug
+        'formbuilder_view_callback' //callback function
+    );
 }
 add_action('admin_menu', 'formbuilder_page');
 
@@ -72,6 +80,7 @@ function formbuilder_admincallback(){
  */
 function formbuilder_view_shortcode( $atts ){
     wp_enqueue_style( 'formbuilder-bootstrap' );
+    wp_enqueue_script( 'formbuilder-js' );
 
     $shortcode_args = shortcode_atts(
         array(
@@ -96,9 +105,12 @@ function formbuilder_view_shortcode( $atts ){
     if( $query->have_posts() ){
         while( $query->have_posts() ){
             $query->the_post();
+            $form_id = get_the_ID();
             ?>
                 <h4 class="card-title"><?php _e(  the_title(), 'formbuilder' ) ?></h4><hr>
                 <form action="" method="POST">
+                    <input type="hidden" name="formbuilder_formid" id="formbuilder_formid" value=<?php echo $form_id ?>>
+                    <input type="hidden" name="formbuilder" id="formbuilder_newform_id" value="formbuilder">
             <?php
             $content = get_the_content();
             $explode_data = explode( ']', $content );
@@ -147,11 +159,83 @@ function formbuilder_view_shortcode( $atts ){
         </div>
     </div>
     <?php
-
+        // formbuilder_newform_submit();
     $result = ob_get_clean();
     return $result;
 }
 add_shortcode( 'formbuilder-shortcode', 'formbuilder_view_shortcode' );
+
+/**
+ * Form Submit
+ */
+function formbuilder_newform_submit(){
+    if( isset( $_POST['action'] ) == 'new_form_submit' ){
+        $data = $_POST['data'];
+
+        // Parse the query string
+        parse_str( $data, $params );
+        if( isset( $params['formbuilder'] ) != 'formbuilder' ){
+            return;
+        }
+        if( ! wp_verify_nonce( wp_unslash( $params['formbuilder_newnonce'] ), 'formbuilder_newform' ) ) {
+            return;
+        };
+
+        // Get form ID.
+        $form_id = $params['formbuilder_formid'];
+        $postdata = $params;
+
+        // Get old post meta.
+        $existing_postmeta = get_post_meta( $form_id, 'formbuilder_postmeta', true );
+
+        if ( ! empty( $existing_postmeta ) ){
+            $new_values = $existing_postmeta;
+            $new_values[] = $postdata;
+        }else{
+            $new_values = array($postdata);
+        }
+
+        $save_formbuilder_newform_data = update_post_meta( $form_id, 'formbuilder_postmeta', $new_values );
+
+        if ( $save_formbuilder_newform_data ) {
+            wp_send_json_success( 'Form submission successful' );
+        } else {
+            wp_send_json_error( 'Form submission failed' );
+        }
+    }
+
+    wp_die();
+    // wp_send_json_success
+    // wp_send_json_error
+}
+add_action( 'wp_ajax_new_form_submit', 'formbuilder_newform_submit' );
+
+/**
+ * 
+ * formbuilder_view_callback
+ */
+function formbuilder_view_callback(){
+    $args = array(
+        'post_type' => 'formbuilder',
+        'post_status' => 'publish',
+    );
+
+    $query = new WP_Query($args);
+    if( $query->have_posts() ){
+        while ( $query->have_posts() ){
+            $query->the_post();
+            
+            $get_postmeta_values = get_post_meta( get_the_ID(), 'formbuilder_postmeta', true );
+            echo '<pre>';
+            print_r($get_postmeta_values);
+           
+            // print_r($postmeta_values);
+        }
+    }
+
+    // include('templates/formbuilder-formdata-view.php');
+
+}
 
 /**
  * Callback function for formbuilder_page add_submenu_page
@@ -180,6 +264,7 @@ function formbuilder_formsubmit( $post_id ){
         $postdata['post_type'] = 'formbuilder';
 
         $save_formbuilder_page_submit = wp_insert_post( $postdata );
+
     }elseif( isset( $_POST['formbuilder_update_submit'] ) ){
         if( ! wp_verify_nonce( wp_unslash( $_POST['formbuilder_nonce'] ), 'formbuilder_form' ) ) {
             return;
@@ -191,7 +276,7 @@ function formbuilder_formsubmit( $post_id ){
         $postdata['post_status'] = 'publish';
         $postdata['post_type'] = 'formbuilder';
 
-        $update_formbuilder_page_submit = wp_update_post( $postdata);
+        $update_formbuilder_page_submit = wp_update_post( $postdata );
     }
 }
 add_action( 'admin_init', 'formbuilder_formsubmit' );
@@ -218,12 +303,18 @@ function formbuilder_admin_stylesheet() {
     //bootstrap cdn.
     wp_register_style( 'formbuilder-bootstrap', 'https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css' );
     
-    // ajax.
+    // ajax cdn.
     wp_register_script( 'formbuilder-ajax', 'https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js' );
+    
+    //toastr js cdn.
+    wp_register_script( 'formbuilder-toastr_js', 'https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.0.1/js/toastr.js' );
+
+    //toastr css cdn.
+    wp_register_style( 'formbuilder-toastr_css', 'https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.0.1/css/toastr.css' );
 
     //custom js, css.
-    wp_register_script( 'formbuilder-js', plugins_url( 'assets/js/formbuilder-script.js', __FILE__ ), array( 'jquery','formbuilder-ajax' ), null, true );
-    wp_register_style( 'formbuilder-css', plugins_url( 'assets/css/formbuilder-style.css', __FILE__ ), array( 'formbuilder-bootstrap' ) );
+    wp_register_script( 'formbuilder-js', plugins_url( 'assets/js/formbuilder-script.js', __FILE__ ), array( 'jquery','formbuilder-ajax', 'formbuilder-toastr_js' ), null, true );
+    wp_register_style( 'formbuilder-css', plugins_url( 'assets/css/formbuilder-style.css', __FILE__ ), array( 'formbuilder-bootstrap', 'formbuilder-toastr_css' ) );
 
 }
 add_action( 'admin_enqueue_scripts', 'formbuilder_admin_stylesheet' );
@@ -232,13 +323,22 @@ add_action( 'admin_enqueue_scripts', 'formbuilder_admin_stylesheet' );
  * Enqueue styles and scripts.
  */
 function formbuilder_stylesheet() {
-    //bootstrap cdn.
+    // Bootstrap CDN.
     wp_register_style( 'formbuilder-bootstrap', 'https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css' );
         
-    //custom js, css.
-    // wp_register_script( 'formbuilder-js', plugins_url( 'assets/js/formbuilder-script.js', __FILE__ ), array( 'jquery' ), null, true );
-    // wp_register_style( 'formbuilder-css', plugins_url( 'assets/css/formbuilder-style.css', __FILE__ ), array( 'formbuilder-bootstrap' ) );
+    // Ajax CDN.
+    wp_register_script( 'formbuilder-ajax', 'https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js' );
+    
+    //Custom JS.
+    wp_register_script( 'formbuilder-js', plugins_url( 'assets/js/formbuilder-frontendscript.js', __FILE__ ), array( 'jquery', 'formbuilder-ajax' ), null, true );
+
+    // Localize the script with the AJAX URL.
+    wp_localize_script( 'formbuilder-js', 'custom_ajax', array(
+        'ajax_url' => admin_url( 'admin-ajax.php' ),
+    ));
+    
+    // Custom CSS.
+    wp_register_style( 'formbuilder-css', plugins_url( 'assets/css/formbuilder-style.css', __FILE__ ), array( 'formbuilder-bootstrap' ) );
 
 }
 add_action( 'wp_enqueue_scripts', 'formbuilder_stylesheet' );
-
