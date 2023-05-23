@@ -106,11 +106,14 @@ function formbuilder_view_shortcode( $atts ){
         while( $query->have_posts() ){
             $query->the_post();
             $form_id = get_the_ID();
+            date_default_timezone_set('Asia/Kathmandu');
+            $currentDate = date('Y-m-d h:i:s');
             ?>
                 <h4 class="card-title"><?php _e(  the_title(), 'formbuilder' ) ?></h4><hr>
                 <form action="" method="POST">
                     <input type="hidden" name="formbuilder_formid" id="formbuilder_formid" value=<?php echo $form_id ?>>
                     <input type="hidden" name="formbuilder" id="formbuilder_newform_id" value="formbuilder">
+                    <input type="hidden" name="formbuilder_submission_date" id="formbuilder_submission_date" value= "<?php echo $currentDate; ?>" >
             <?php
             $content = get_the_content();
             $explode_data = explode( ']', $content );
@@ -159,7 +162,6 @@ function formbuilder_view_shortcode( $atts ){
         </div>
     </div>
     <?php
-        // formbuilder_newform_submit();
     $result = ob_get_clean();
     return $result;
 }
@@ -198,6 +200,24 @@ function formbuilder_newform_submit(){
         $save_formbuilder_newform_data = update_post_meta( $form_id, 'formbuilder_postmeta', $new_values );
 
         if ( $save_formbuilder_newform_data ) {
+            $omit_first_key = array_slice( $postdata, 1 );
+            $omit_last_keys = array_slice( $omit_first_key, 0, -2 );
+            $to = 'anjali.codewing@gmail.com';
+            $subject = 'Form Values';
+            
+            $table = '<table class="table table-bordered">';
+            foreach ($omit_last_keys as $key => $value) {
+                $table .= '<tr><td>' . $key  . ':'.'</td><td>' . $value . '</td></tr>';
+            }
+            $table .= '</table>';
+
+            $message = $table;
+
+            $headers = array('Content-Type: text/html; charset=UTF-8');
+
+            // Send mail.
+            wp_mail( $to, $subject, $message, $headers );
+
             wp_send_json_success( 'Form submission successful' );
         } else {
             wp_send_json_error( 'Form submission failed' );
@@ -211,30 +231,76 @@ function formbuilder_newform_submit(){
 add_action( 'wp_ajax_new_form_submit', 'formbuilder_newform_submit' );
 
 /**
+ * Callback function for 
+ * formbuilder_view_callback.
  * 
- * formbuilder_view_callback
+ * @return void.
  */
-function formbuilder_view_callback(){
+function formbuilder_view_callback() {
+    wp_enqueue_style('formbuilder-css');
     $args = array(
         'post_type' => 'formbuilder',
         'post_status' => 'publish',
     );
 
-    $query = new WP_Query($args);
-    if( $query->have_posts() ){
-        while ( $query->have_posts() ){
-            $query->the_post();
-            
-            $get_postmeta_values = get_post_meta( get_the_ID(), 'formbuilder_postmeta', true );
-            echo '<pre>';
-            print_r($get_postmeta_values);
-           
-            // print_r($postmeta_values);
-        }
-    }
+    $query = new WP_Query( $args );
+    ?>
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    <h2> <?php _e('Submitted Values', 'formbuilder') ?> </h2><hr>
+                    <table class="table table-bordered">
+                        <tr>
+                            <th >
+                                <?php _e('Form ID', 'formbuilder') ?>
+                            </th>
+                            <th >
+                                <?php _e('Form Values', 'formbuilder') ?>
+                            </th>
+                            <th >
+                                <?php _e('Submission Date', 'formbuilder') ?>
+                            </th>
+                        </tr>
+                        <?php
+                            if( $query->have_posts() ){
+                                while ( $query->have_posts() ){
+                                    $query->the_post();
+                                    
+                                    $get_postmeta_values = get_post_meta( get_the_ID(), 'formbuilder_postmeta', true );
 
-    // include('templates/formbuilder-formdata-view.php');
-
+                                    if ( isset( $get_postmeta_values ) && ! empty( $get_postmeta_values ) ){
+                                        foreach ( $get_postmeta_values as $key => $value ) {
+                                            $array_value = $value;
+                                            $omit_first_key = array_slice( $array_value, 1 );
+                                            $omit_last_keys = array_slice( $omit_first_key, 0, -2 );
+                                            ?>
+                                                <tr>
+                                                    <td > <?php _e( isset( $omit_last_keys['formbuilder_formid'] ) ? $omit_last_keys['formbuilder_formid'] : '' ) ?> </td>
+                                                    <td>
+                                                        <?php
+                                                            $array_key_values = array_slice( $omit_last_keys, 3 );
+                                                            foreach ($array_key_values as $key => $value) {
+                                                                echo esc_attr($key . ': ' . $value);
+                                                                echo '<br>';
+                                                            }
+                                                        ?>
+                                                    </td>
+                                                    <td > 
+                                                        <?php _e( isset( $omit_last_keys['formbuilder_submission_date'] ) ? $omit_last_keys['formbuilder_submission_date'] : '' ); ?> 
+                                                    </td>
+                                                </tr>
+                                            <?php
+                                        }
+                                    }
+                                }
+                            }
+                            wp_reset_postdata();
+                        ?>
+                    </table>
+                </div>
+            </div>
+        </div>
+    <?php
 }
 
 /**
