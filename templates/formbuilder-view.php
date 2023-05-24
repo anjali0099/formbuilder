@@ -50,8 +50,7 @@ wp_enqueue_style( 'formbuilder-css' );
                                     </a>
                                     <a class="btn btn-sm btn-danger" href="admin.php?page=admin-form-builder&action=delete&form_id=<?php echo esc_html($Post_id); ?>" onclick="return confirm('Are you sure you want to delete this post?');">
                                         <?php _e( 'Delete', 'formbuilder' ) ?>
-                                    </a> 
-                                    <!-- <button class="btn btn-sm btn-danger" onclick="delete_formbuilder_post('<?php echo esc_html($Post_id); ?>')">Delete</button> -->
+                                    </a>
                                 </td>
                             </tr>
                         <?php

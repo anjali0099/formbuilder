@@ -44,6 +44,8 @@ function formbuilder_page(){
         'edit_posts',//capability 
         'admin-form-builder',//menu slug/handle this is what you need!!!
         'formbuilder_admincallback',//callback function
+        'dashicons-forms', //icon
+        10, //position
     );
     add_submenu_page(
         'admin-form-builder', //parent menu slug
@@ -185,6 +187,19 @@ function formbuilder_newform_submit(){
 
         // Get form ID.
         $form_id = $params['formbuilder_formid'];
+
+        $omit_postdata_firstkey = array_slice( $params, 1 );
+        $omit_postdata_lastkeys = array_slice( $omit_postdata_firstkey, 0, -2 );
+
+        $errors = array();
+        foreach ($omit_postdata_lastkeys as $key => $value) {
+            # code...
+            if(empty($value)){
+                wp_send_json_error( 'Some fields are empty .' );
+                return;
+            }
+        }
+
         $postdata = $params;
 
         // Get old post meta.
@@ -202,6 +217,8 @@ function formbuilder_newform_submit(){
         if ( $save_formbuilder_newform_data ) {
             $omit_first_key = array_slice( $postdata, 1 );
             $omit_last_keys = array_slice( $omit_first_key, 0, -2 );
+
+            // Mail contents.
             $to = 'anjali.codewing@gmail.com';
             $subject = 'Form Values';
             
@@ -225,8 +242,6 @@ function formbuilder_newform_submit(){
     }
 
     wp_die();
-    // wp_send_json_success
-    // wp_send_json_error
 }
 add_action( 'wp_ajax_new_form_submit', 'formbuilder_newform_submit' );
 
@@ -241,6 +256,7 @@ function formbuilder_view_callback() {
     $args = array(
         'post_type' => 'formbuilder',
         'post_status' => 'publish',
+        'order' => 'ASC',
     );
 
     $query = new WP_Query( $args );
@@ -315,6 +331,7 @@ function formbuilder_callback_menu(){
 /**
  * Form submit 
  * Update Form
+ * 
  * @param array $post_id Post ID
  * @return void
  */ 

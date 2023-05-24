@@ -20,10 +20,11 @@
         }else if ( selected_id == 'textarea_field' ){
             var inserted_text = '[type="textarea" name="form_textarea_field" id="textareafield_'+randnum+'" placeholder="type here something" label="type something"]';
             box.value = box.value.substring(0, startPos) + inserted_text + box.value.substring(endPos);
-        }else if ( selected_id == 'password_field' ){
-            var inserted_text = '[type="password" name="form_password_field" id="passwordfield_'+randnum+'" placeholder="type here something" label="type something"]';
-            box.value = box.value.substring(0, startPos) + inserted_text + box.value.substring(endPos);
         }
+        // else if ( selected_id == 'password_field' ){
+        //     var inserted_text = '[type="password" name="form_password_field" id="passwordfield_'+randnum+'" placeholder="type here something" label="type something"]';
+        //     box.value = box.value.substring(0, startPos) + inserted_text + box.value.substring(endPos);
+        // }
 
         // Set the new cursor position based on the updated box.value
         var newCursorPos = startPos + inserted_text.length;

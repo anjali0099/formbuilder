@@ -14,7 +14,7 @@
                 if( json.success )
 				    alert( json.data );
                 else
-                    alert( 'Error!!' + json.data );     
+                    alert( 'Error!! ' + json.data );     
                 location.reload(); 
             }
         });
